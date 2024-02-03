@@ -7,13 +7,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.cgl.ui.theme.CGLTheme
@@ -25,44 +23,78 @@ fun PieChartScreen() {
         Spacer(modifier = Modifier.height(200.dp))
         PieChart(
             modifier = Modifier
-                .size(width = 200.dp, height = 200.dp)
-                .align(Alignment.CenterHorizontally)
+                .size(width = 300.dp, height = 300.dp)
+                .align(Alignment.CenterHorizontally),
+            listOf(
+                PieChartSegment(Color.Red, 5f),
+                PieChartSegment(Color.Green, 10f),
+                PieChartSegment(Color.Blue, 15f),
+                PieChartSegment(Color.Yellow, 20f),
+                PieChartSegment(Color.Black, 20f)
+            )
         )
     }
 }
 
 @Composable
-fun PieChart(modifier:Modifier = Modifier){
+fun PieChart(
+    modifier: Modifier = Modifier,
+    segments: List<PieChartSegment>
+) {
 
-    Box(modifier = modifier){
+    Box(modifier = modifier) {
         Canvas(modifier = modifier) {
-            val canvasWidth = size.width
-            val canvasHeight = size.height
+            val totalValue = segments.map { it.percentage }.sum()
 
-            val center = Offset(x = size.width / 2, y = size.height / 2)
+            var startAngle = -90f
 
-            val radius = minOf(size.width, size.height) / 2
-            drawCircle(
-                color = Color.Blue,
-                center = center,
-                radius = radius
-            )
+            segments.forEach { segment ->
+                val sweepAngle = if (totalValue > 0f) {
+                    (segment.percentage / totalValue) * 360f
+                } else {
+                    0f
+                }
+
+                drawPieChartSegment(
+                    segmentColor = segment.color,
+                    startAngle = startAngle,
+                    sweepAngle = sweepAngle
+                )
+                startAngle += sweepAngle
+            }
         }
     }
 }
 
+fun DrawScope.drawPieChartSegment(
+    segmentColor: Color,
+    startAngle: Float,
+    sweepAngle: Float
+) {
+    drawArc(
+        color = segmentColor,
+        startAngle = startAngle,
+        sweepAngle = sweepAngle,
+        useCenter = true
+    )
+}
+
+
+data class PieChartSegment(val color: Color, val percentage: Float)
+
+
 @Composable
 @Preview(showBackground = true)
-fun previewPieChar(){
+fun previewPieChar() {
     CGLTheme() {
-        PieChart()
+        PieChart(segments = emptyList())
     }
 }
 
 
 @Composable
 @Preview(showBackground = true)
-fun previewPieChartScreen(){
+fun previewPieChartScreen() {
     CGLTheme() {
         PieChartScreen()
     }
