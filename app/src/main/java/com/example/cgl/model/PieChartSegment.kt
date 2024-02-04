@@ -9,5 +9,6 @@ data class PieChartSegment(
     val percentage: Float,
     val gradientColors: List<Color>? = null,
     val shadow: Shadow? = null,
-    val stroke: Stroke? = null
+    val stroke: Stroke? = null,
+    val imageRes: Int? = null
 )

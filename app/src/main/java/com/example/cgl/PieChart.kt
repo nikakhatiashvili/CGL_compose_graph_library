@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import com.example.cgl.ui.theme.*
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.geometry.Rect
@@ -14,7 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.DrawScope
@@ -32,12 +32,15 @@ fun PieChartScreen() {
 
 
         val pieChartData3 = listOf(
-            PieChartSegment(color = Color.Magenta, percentage = 30f),
-            PieChartSegment(
-                color = Color.Yellow,
-                percentage = 70f,
-                gradientColors = listOf(Color.Yellow, Color.Cyan)
-            )
+            PieChartSegment(color = red, percentage = 46f),
+            PieChartSegment(color = cyan, percentage = 16f),
+            PieChartSegment(color = lightGreen, percentage = 10f),
+            PieChartSegment(color = yellow, percentage = 9f),
+            PieChartSegment(color = darkPink, percentage = 8f),
+            PieChartSegment(color = orange, percentage = 6f),
+            PieChartSegment(color = gray, percentage = 2f),
+            PieChartSegment(color = lightYellow, percentage = 1.5f),
+            PieChartSegment(color = lightGray, percentage = 1f),
         )
 
         PieChart(
@@ -45,7 +48,7 @@ fun PieChartScreen() {
                 .size(width = 300.dp, height = 300.dp)
                 .align(Alignment.CenterHorizontally),
             pieChartData3,
-            90f
+            25f
         )
     }
 }
