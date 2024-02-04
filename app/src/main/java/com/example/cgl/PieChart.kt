@@ -18,10 +18,10 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.cgl.model.PieChartSegment
 import com.example.cgl.ui.theme.CGLTheme
 import java.lang.Math.cos
 import java.lang.Math.sin
-
 
 @Composable
 fun PieChartScreen() {
@@ -36,7 +36,7 @@ fun PieChartScreen() {
                 PieChartSegment(Color.Green, 20f),
                 PieChartSegment(Color.Blue, 40f)
             ),
-            100f
+            30f
         )
     }
 }
@@ -75,7 +75,6 @@ fun PieChart(
         }
     }
 }
-
 
 fun DrawScope.drawPieChartSegment(
     segmentColor: Color,
@@ -120,13 +119,6 @@ fun DrawScope.drawPieChartSegment(
 
     drawPath(path = path, color = segmentColor)
 }
-
-data class PieChartSegment(val color: Color, val percentage: Float)
-
-//notes
-// circle is 360 degrees so 1 percent represents 360/100 = 3.6 degrees
-// Cavnas uses radians instead of degrees so we have to convert degrees to radians
-
 
 @Composable
 @Preview(showBackground = true)
