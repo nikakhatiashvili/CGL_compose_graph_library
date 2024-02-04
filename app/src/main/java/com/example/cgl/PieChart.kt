@@ -13,30 +13,39 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.cgl.model.PieChartSegment
 import com.example.cgl.ui.theme.CGLTheme
-import java.lang.Math.cos
-import java.lang.Math.sin
+import kotlin.math.cos
+import kotlin.math.sin
 
 @Composable
 fun PieChartScreen() {
     Column(modifier = Modifier.fillMaxSize()) {
         Spacer(modifier = Modifier.height(200.dp))
+
+
+        val pieChartData3 = listOf(
+            PieChartSegment(color = Color.Magenta, percentage = 30f),
+            PieChartSegment(
+                color = Color.Yellow,
+                percentage = 70f,
+                gradientColors = listOf(Color.Yellow, Color.Cyan)
+            )
+        )
+
         PieChart(
             modifier = Modifier
                 .size(width = 300.dp, height = 300.dp)
                 .align(Alignment.CenterHorizontally),
-            listOf(
-                PieChartSegment(Color.Red, 40f),
-                PieChartSegment(Color.Green, 20f),
-                PieChartSegment(Color.Blue, 40f)
-            ),
-            30f
+            pieChartData3,
+            90f
         )
     }
 }
@@ -49,6 +58,7 @@ fun PieChart(
 ) {
 
     Box(modifier = modifier) {
+
         Canvas(modifier = modifier) {
             val totalValue = segments.map { it.percentage }.sum()
 
@@ -64,11 +74,11 @@ fun PieChart(
                 }
 
                 drawPieChartSegment(
-                    segmentColor = segment.color,
                     startAngle = startAngle,
                     sweepAngle = sweepAngle,
                     innerRadius = innerRadius,
-                    outerRadius = outerRadius
+                    outerRadius = outerRadius,
+                    segment = segment,
                 )
                 startAngle += sweepAngle
             }
@@ -77,47 +87,60 @@ fun PieChart(
 }
 
 fun DrawScope.drawPieChartSegment(
-    segmentColor: Color,
+    segment: PieChartSegment,
     startAngle: Float,
     sweepAngle: Float,
     innerRadius: Float,
     outerRadius: Float
 ) {
+    val actualStartAngle = startAngle
+    val actualSweepAngle = if (sweepAngle == 360f) 359.999f else sweepAngle
+
+    val outerRect = Rect(
+        Offset(size.width / 2 - outerRadius, size.height / 2 - outerRadius),
+        Size(outerRadius * 2, outerRadius * 2)
+    )
+    val innerRect = Rect(
+        Offset(size.width / 2 - innerRadius, size.height / 2 - innerRadius),
+        Size(innerRadius * 2, innerRadius * 2)
+    )
+
     val path = Path().apply {
-        moveTo(
-            x = (size.width / 2 + outerRadius * cos(Math.toRadians(startAngle.toDouble()))).toFloat(),
-            y = (size.height / 2 + outerRadius * sin(Math.toRadians(startAngle.toDouble()))).toFloat()
-        )
+        arcTo(outerRect, actualStartAngle, actualSweepAngle, false)
 
-        arcTo(
-            rect = Rect(
-                Offset(size.width / 2 - outerRadius, size.height / 2 - outerRadius),
-                Size(outerRadius * 2, outerRadius * 2)
-            ),
-            startAngleDegrees = startAngle,
-            sweepAngleDegrees = sweepAngle,
-            forceMoveTo = false
-        )
-
+        val angle = Math.toRadians((actualStartAngle + actualSweepAngle).toDouble()).toFloat()
         lineTo(
-            x = (size.width / 2 + innerRadius * cos(Math.toRadians(startAngle + sweepAngle.toDouble()))).toFloat(),
-            y = (size.height / 2 + innerRadius * sin(Math.toRadians(startAngle + sweepAngle.toDouble()))).toFloat()
+            (size.width / 2 + innerRadius * cos(angle)),
+            (size.height / 2 + innerRadius * sin(angle))
         )
 
-        arcTo(
-            rect = Rect(
-                Offset(size.width / 2 - innerRadius, size.height / 2 - innerRadius),
-                Size(innerRadius * 2, innerRadius * 2)
-            ),
-            startAngleDegrees = startAngle + sweepAngle,
-            sweepAngleDegrees = -sweepAngle,
-            forceMoveTo = false
-        )
+        arcTo(innerRect, actualStartAngle + actualSweepAngle, -actualSweepAngle, false)
 
         close()
     }
 
-    drawPath(path = path, color = segmentColor)
+    val brush = when {
+        segment.gradientColors.isNullOrEmpty() -> SolidColor(segment.color)
+        segment.gradientColors.size == 1 -> SolidColor(segment.gradientColors.first())
+        else -> {
+            val gradientStartAngle = Math.toRadians(actualStartAngle.toDouble()).toFloat()
+            val gradientEndAngle =
+                Math.toRadians((actualStartAngle + actualSweepAngle).toDouble()).toFloat()
+            Brush.linearGradient(
+                colors = segment.gradientColors,
+                start = Offset(
+                    (size.width / 2 + outerRadius * cos(gradientStartAngle)),
+                    (size.height / 2 + outerRadius * sin(gradientStartAngle))
+                ),
+                end = Offset(
+                    (size.width / 2 + outerRadius * cos(gradientEndAngle)),
+                    (size.height / 2 + outerRadius * sin(gradientEndAngle))
+                )
+            )
+        }
+    }
+
+    drawPath(path = path, brush = brush)
 }
 
 @Composable
